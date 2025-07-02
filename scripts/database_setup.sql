@@ -14,7 +14,7 @@ CREATE TABLE IF NOT EXISTS events (
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- Create photos table
+-- Create Photos table
 CREATE TABLE IF NOT EXISTS photos (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     event_id UUID REFERENCES events(id) ON DELETE CASCADE,
@@ -40,7 +40,7 @@ CREATE TABLE IF NOT EXISTS face_encodings (
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- Create photo_interactions table (likes, views, etc.)
+-- Create Photo_interactions table (likes, views, etc.)
 CREATE TABLE IF NOT EXISTS photo_interactions (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     photo_id UUID REFERENCES photos(id) ON DELETE CASCADE,
