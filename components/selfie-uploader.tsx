@@ -1,43 +1,42 @@
-"use client"
+"use client";
 
-import { useState, useCallback } from "react"
-import { useDropzone } from "react-dropzone"
-import { motion } from "framer-motion"
-import { Upload, Camera, Loader2, CheckCircle, AlertCircle } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
-import { Progress } from "@/components/ui/progress"
+import { useState, useCallback } from "react";
+import { useDropzone } from "react-dropzone";
+import { motion } from "framer-motion";
+import { Upload, Camera, Loader2, CheckCircle, AlertCircle } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Progress } from "@/components/ui/progress";
 
 interface SelfieUploaderProps {
-  onSelfieUpload: (file: File) => void
-  isMatching: boolean
+  onSelfieUpload: (file: File) => void;
+  isMatching: boolean;
 }
 
 export function SelfieUploader({ onSelfieUpload, isMatching }: SelfieUploaderProps) {
-  const [uploadedFile, setUploadedFile] = useState<File | null>(null)
-  const [previewUrl, setPreviewUrl] = useState<string | null>(null)
-  const [uploadProgress, setUploadProgress] = useState(0)
+  const [uploadedFile, setUploadedFile] = useState<File | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [uploadProgress, setUploadProgress] = useState(0);
 
   const onDrop = useCallback((acceptedFiles: File[]) => {
-    const file = acceptedFiles[0]
+    const file = acceptedFiles[0];
     if (file) {
-      setUploadedFile(file)
-      const url = URL.createObjectURL(file)
-      setPreviewUrl(url)
+      setUploadedFile(file);
+      setPreviewUrl(URL.createObjectURL(file));
 
-      // Simulate upload progress
-      setUploadProgress(0)
+      // Simulate upload
+      setUploadProgress(0);
       const interval = setInterval(() => {
         setUploadProgress((prev) => {
           if (prev >= 100) {
-            clearInterval(interval)
-            return 100
+            clearInterval(interval);
+            return 100;
           }
-          return prev + 10
-        })
-      }, 100)
+          return prev + 10;
+        });
+      }, 100);
     }
-  }, [])
+  }, []);
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
@@ -46,28 +45,32 @@ export function SelfieUploader({ onSelfieUpload, isMatching }: SelfieUploaderPro
     },
     maxFiles: 1,
     maxSize: 10 * 1024 * 1024, // 10MB
-  })
+  });
 
   const handleStartMatching = () => {
-    if (uploadedFile) {
-      onSelfieUpload(uploadedFile)
-    }
-  }
+    if (uploadedFile) onSelfieUpload(uploadedFile);
+  };
 
   const handleReset = () => {
-    setUploadedFile(null)
-    setPreviewUrl(null)
-    setUploadProgress(0)
-  }
+    setUploadedFile(null);
+    setPreviewUrl(null);
+    setUploadProgress(0);
+  };
 
   return (
-    <Card className="border-blue-200 shadow-lg">
+    <Card className="border border-border shadow-lg">
       <CardContent className="p-6">
         {!uploadedFile ? (
           <motion.div
-            {...getRootProps()}
+            {...getRootProps({ refKey: undefined, onClick: undefined, onFocus: undefined, onBlur: undefined, tabIndex: undefined })}
+            onClick={getRootProps().onClick}
+            onFocus={getRootProps().onFocus}
+            onBlur={getRootProps().onBlur}
+            tabIndex={getRootProps().tabIndex}
             className={`border-2 border-dashed rounded-lg p-8 text-center cursor-pointer transition-colors ${
-              isDragActive ? "border-blue-400 bg-blue-50" : "border-blue-200 hover:border-blue-300 hover:bg-blue-50/50"
+              isDragActive
+                ? "border-blue-400 bg-blue-50"
+                : "border-blue-200 hover:border-blue-300 hover:bg-blue-50/50"
             }`}
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
@@ -77,17 +80,11 @@ export function SelfieUploader({ onSelfieUpload, isMatching }: SelfieUploaderPro
               <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto">
                 <Upload className="h-8 w-8 text-blue-600" />
               </div>
-              <div>
-                <h3 className="text-lg font-semibold text-blue-900 mb-2">Upload Your Selfie</h3>
-                <p className="text-blue-700 mb-4">
-                  {isDragActive ? "Drop your selfie here..." : "Drag & drop your selfie here, or click to browse"}
-                </p>
-                <p className="text-sm text-blue-600">Supports JPG, PNG, WebP (max 10MB)</p>
-              </div>
-              <Button type="button" className="bg-blue-600 hover:bg-blue-700">
-                <Camera className="h-4 w-4 mr-2" />
-                Choose Photo
-              </Button>
+              <h3 className="text-lg font-semibold text-blue-900 mb-2">Upload Your Selfie</h3>
+              <p className="text-blue-700 mb-1">
+                {isDragActive ? "Drop your selfie here..." : "Drag & drop your selfie, or click to browse"}
+              </p>
+              <p className="text-sm text-blue-600">Supports JPG, PNG, WebP (max 10MB)</p>
             </div>
           </motion.div>
         ) : (
@@ -96,7 +93,7 @@ export function SelfieUploader({ onSelfieUpload, isMatching }: SelfieUploaderPro
             <div className="text-center">
               <div className="relative inline-block">
                 <img
-                  src={previewUrl! || "/placeholder.svg"}
+                  src={previewUrl ?? "/placeholder.svg"}
                   alt="Uploaded selfie"
                   className="w-48 h-48 object-cover rounded-lg shadow-md mx-auto"
                 />
@@ -125,7 +122,11 @@ export function SelfieUploader({ onSelfieUpload, isMatching }: SelfieUploaderPro
                 animate={{ opacity: 1, y: 0 }}
                 className="flex flex-col sm:flex-row gap-3 justify-center"
               >
-                <Button onClick={handleStartMatching} disabled={isMatching} className="bg-blue-600 hover:bg-blue-700">
+                <Button
+                  onClick={handleStartMatching}
+                  disabled={isMatching}
+                  className="bg-blue-600 hover:bg-blue-700"
+                >
                   {isMatching ? (
                     <>
                       <Loader2 className="h-4 w-4 mr-2 animate-spin" />
@@ -161,7 +162,7 @@ export function SelfieUploader({ onSelfieUpload, isMatching }: SelfieUploaderPro
                 </div>
                 <div>
                   <h3 className="text-lg font-semibold text-blue-900 mb-2">AI is analyzing your photo...</h3>
-                  <p className="text-blue-700">This may take a few moments while we search through all event photos</p>
+                  <p className="text-blue-700">This may take a few moments while we search event photos</p>
                 </div>
               </motion.div>
             )}
@@ -183,5 +184,5 @@ export function SelfieUploader({ onSelfieUpload, isMatching }: SelfieUploaderPro
         </div>
       </CardContent>
     </Card>
-  )
+  );
 }
