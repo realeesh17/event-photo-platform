@@ -1,12 +1,14 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { motion } from "framer-motion"
 import { Camera, Users, Download, ArrowLeft, Sparkles } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
 import { PhotoGallery } from "@/components/photo-gallery"
 import { SelfieUploader } from "@/components/selfie-uploader"
+import { getStorage, ref, listAll, getDownloadURL } from "firebase/storage"
+import { app } from "@/lib/firebase"
 
 interface EventPageProps {
   params: {
@@ -18,31 +20,43 @@ export default function EventPage({ params }: EventPageProps) {
   const [activeTab, setActiveTab] = useState<"gallery" | "selfie">("selfie")
   const [matchedPhotos, setMatchedPhotos] = useState<string[]>([])
   const [isMatching, setIsMatching] = useState(false)
+  const [allPhotos, setAllPhotos] = useState<string[]>([])
+  const [loadingPhotos, setLoadingPhotos] = useState(true)
 
-  // Mock event data - in real app, fetch from database
   const eventData = {
     name: "Sarah & John's Wedding",
     date: "June 15, 2024",
     location: "Sunset Gardens",
-    totalPhotos: 247,
+    totalPhotos: allPhotos.length,
     code: params.code,
   }
+
+  useEffect(() => {
+    const fetchImages = async () => {
+      try {
+        const storage = getStorage(app)
+        const folderRef = ref(storage, `events/${params.code}`)
+        const res = await listAll(folderRef)
+        const urls = await Promise.all(
+          res.items.map((item) => getDownloadURL(item))
+        )
+        setAllPhotos(urls)
+      } catch (error) {
+        console.error("Error loading images:", error)
+      } finally {
+        setLoadingPhotos(false)
+      }
+    }
+
+    fetchImages()
+  }, [params.code])
 
   const handleSelfieMatch = async (selfieFile: File) => {
     setIsMatching(true)
 
-    // Mock API call for face matching
-    // In real implementation, send to your Python Flask API
+    // 🧠 Later: connect to backend ML API
     setTimeout(() => {
-      // Mock matched photos
-      const mockMatches = [
-        "/placeholder.svg?height=400&width=300",
-        "/placeholder.svg?height=300&width=400",
-        "/placeholder.svg?height=350&width=350",
-        "/placeholder.svg?height=400&width=280",
-        "/placeholder.svg?height=320&width=400",
-        "/placeholder.svg?height=380&width=320",
-      ]
+      const mockMatches = allPhotos.slice(0, 6) // Simulated match
       setMatchedPhotos(mockMatches)
       setIsMatching(false)
       setActiveTab("gallery")
@@ -73,7 +87,7 @@ export default function EventPage({ params }: EventPageProps) {
         </div>
       </header>
 
-      {/* Navigation Tabs */}
+      {/* Tabs */}
       <div className="container mx-auto px-4 py-6">
         <div className="flex justify-center mb-8">
           <div className="bg-white rounded-lg p-1 shadow-sm border border-blue-200">
@@ -96,7 +110,7 @@ export default function EventPage({ params }: EventPageProps) {
           </div>
         </div>
 
-        {/* Content */}
+        {/* Dynamic Tab Content */}
         <motion.div
           key={activeTab}
           initial={{ opacity: 0, y: 20 }}
@@ -130,7 +144,7 @@ export default function EventPage({ params }: EventPageProps) {
                     </Button>
                   </div>
                   <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                    {matchedPhotos.slice(0, 6).map((photo, index) => (
+                    {matchedPhotos.map((photo, index) => (
                       <motion.div
                         key={index}
                         initial={{ opacity: 0, scale: 0.8 }}
@@ -139,7 +153,7 @@ export default function EventPage({ params }: EventPageProps) {
                         className="relative group cursor-pointer"
                       >
                         <img
-                          src={photo || "/placeholder.svg"}
+                          src={photo}
                           alt={`Match ${index + 1}`}
                           className="w-full h-48 object-cover rounded-lg shadow-sm group-hover:shadow-md transition-shadow"
                         />
@@ -157,23 +171,11 @@ export default function EventPage({ params }: EventPageProps) {
               )}
             </div>
           ) : (
-            <PhotoGallery
-              photos={
-                matchedPhotos.length > 0
-                  ? matchedPhotos
-                  : [
-                      "/placeholder.svg?height=400&width=300",
-                      "/placeholder.svg?height=300&width=400",
-                      "/placeholder.svg?height=350&width=350",
-                      "/placeholder.svg?height=400&width=280",
-                      "/placeholder.svg?height=320&width=400",
-                      "/placeholder.svg?height=380&width=320",
-                      "/placeholder.svg?height=300&width=300",
-                      "/placeholder.svg?height=400&width=350",
-                    ]
-              }
-              eventCode={params.code}
-            />
+            loadingPhotos ? (
+              <p className="text-center text-blue-600">Loading gallery...</p>
+            ) : (
+              <PhotoGallery photos={allPhotos} eventCode={params.code} />
+            )
           )}
         </motion.div>
       </div>

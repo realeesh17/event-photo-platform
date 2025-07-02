@@ -1,15 +1,16 @@
 "use client";
+
 import Link from "next/link";
 
 export default function Navbar() {
   return (
-    <nav className="w-full bg-background border-b border-border text-foreground shadow-sm px-6 py-4 flex justify-between items-center">
-      <h1 className="text-xl font-bold text-primary">EventPhoto</h1>
+    <nav className="w-full bg-gradient-to-r from-blue-600 to-blue-400 shadow-md p-4 flex justify-between items-center">
+      <Link href="/" className="text-white text-xl font-bold">
+        SnapShare
+      </Link>
       <div className="space-x-4">
-        <Link href="/" className="hover:text-primary">Home</Link>
-        <Link href="/upload" className="hover:text-primary">Upload</Link>
-        <Link href="/view" className="hover:text-primary">View</Link>
-        <Link href="/feedback" className="hover:text-primary">Feedback</Link>
+        <Link href="/upload" className="text-white hover:underline">Upload</Link>
+        <Link href="/feedback" className="text-white hover:underline">Feedback</Link>
       </div>
     </nav>
   );

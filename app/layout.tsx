@@ -1,25 +1,26 @@
-import type React from "react"
-import type { Metadata } from "next"
-import { Inter } from "next/font/google"
-import "./globals.css"
+import "./globals.css";
+import type { Metadata } from "next";
+import { Inter } from "next/font/google";
+import Navbar from "@/components/Navbar"; // 👈 add this
 
-const inter = Inter({ subsets: ["latin"] })
+const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "PhotoMatch - AI-Powered Event Photo Sharing",
-  description:
-    "Find yourself in event photos using AI face recognition. Perfect for weddings, parties, and special occasions.",
-    generator: 'v0.dev'
-}
+  title: "SnapShare | Event Photo Platform",
+  description: "Upload and find your event photos with ease.",
+};
 
 export default function RootLayout({
   children,
 }: {
-  children: React.ReactNode
+  children: React.ReactNode;
 }) {
   return (
     <html lang="en">
-      <body className={inter.className}>{children}</body>
+      <body className={inter.className}>
+        <Navbar />
+        {children}
+      </body>
     </html>
-  )
+  );
 }

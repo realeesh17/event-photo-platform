@@ -1,3 +1,11 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  @apply bg-background text-foreground;
+}
+
 :root {
   --primary: 210 100% 56%; /* vibrant blue like bluemetrics */
   --primary-foreground: 0 0% 100%;
