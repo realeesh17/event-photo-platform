@@ -17,7 +17,7 @@ from datetime import datetime
 app = Flask(__name__)
 CORS(app)
 
-# In-memory storage for demo (use database in production)
+# In-memory storage for demo (Use DB in Production)
 face_encodings_db = {}
 event_photos = {}
 
