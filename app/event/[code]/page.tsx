@@ -17,16 +17,16 @@ interface EventPageProps {
 }
 
 export default function EventPage({ params }: EventPageProps) {
-  const [activeTab, setActiveTab] = useState<"gallery" | "selfie">("selfie")
+  const [activeTab, setActiveTab] = useState<"gallery" | "selfie">("gallery")
   const [matchedPhotos, setMatchedPhotos] = useState<string[]>([])
   const [isMatching, setIsMatching] = useState(false)
   const [allPhotos, setAllPhotos] = useState<string[]>([])
   const [loadingPhotos, setLoadingPhotos] = useState(true)
 
   const eventData = {
-    name: "Sarah & John's Wedding",
-    date: "June 15, 2024",
-    location: "Sunset Gardens",
+    name: `Event - ${params.code}`,
+    date: "Your Event Date",
+    location: "Your Event Location",
     totalPhotos: allPhotos.length,
     code: params.code,
   }
@@ -54,13 +54,28 @@ export default function EventPage({ params }: EventPageProps) {
   const handleSelfieMatch = async (selfieFile: File) => {
     setIsMatching(true)
 
-    // 🧠 Later: connect to backend ML API
-    setTimeout(() => {
-      const mockMatches = allPhotos.slice(0, 6) // Simulated match
-      setMatchedPhotos(mockMatches)
+    try {
+      const formData = new FormData()
+      formData.append("selfie", selfieFile)
+      formData.append("eventCode", params.code)
+
+      const response = await fetch("http://localhost:5000/match-selfie", {
+        method: "POST",
+        body: formData,
+      })
+
+      const data = await response.json()
+      if (response.ok) {
+        setMatchedPhotos(data.matches || [])
+        setActiveTab("selfie")
+      } else {
+        console.error("Matching failed", data.error)
+      }
+    } catch (err) {
+      console.error("Error sending selfie:", err)
+    } finally {
       setIsMatching(false)
-      setActiveTab("gallery")
-    }, 3000)
+    }
   }
 
   return (
@@ -110,7 +125,6 @@ export default function EventPage({ params }: EventPageProps) {
           </div>
         </div>
 
-        {/* Dynamic Tab Content */}
         <motion.div
           key={activeTab}
           initial={{ opacity: 0, y: 20 }}

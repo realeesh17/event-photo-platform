@@ -43,7 +43,7 @@ export default function UploadPage() {
 
     for (let i = 0; i < files.length; i++) {
       const file = files[i];
-      const metadata = { contentType: file.type }; // ✅ Fix: add metadata for contentType
+      const metadata = { contentType: file.type };
       const storageRef = ref(storage, `events/${eventCode}/${file.name}`);
       const uploadTask = uploadBytesResumable(storageRef, file, metadata);
 
@@ -51,14 +51,13 @@ export default function UploadPage() {
         uploadTask.on(
           "state_changed",
           (snapshot) => {
-            const currentProgress = Math.round(
+            const percent = Math.round(
               (snapshot.bytesTransferred / snapshot.totalBytes) * 100
             );
-            // 🔁 Set progress across all files
-            const totalProgress = Math.floor(
-              ((i * 100 + currentProgress) / (files.length * 100)) * 100
+            console.log(`File ${i + 1}: ${percent}% done`);
+            setProgress(
+              Math.floor(((i * 100 + percent) / (files.length * 100)) * 100)
             );
-            setProgress(totalProgress);
           },
           (error) => {
             console.error("Upload error:", error);
@@ -67,7 +66,6 @@ export default function UploadPage() {
           async () => {
             const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
 
-            // 🔥 Save image metadata in Firestore
             await addDoc(collection(db, "images"), {
               eventCode,
               url: downloadURL,
@@ -82,7 +80,7 @@ export default function UploadPage() {
 
     setUploading(false);
     setSuccess(true);
-    setFiles([]); // optional: clear the selection after upload
+    setFiles([]);
   };
 
   return (
