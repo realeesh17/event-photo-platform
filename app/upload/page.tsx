@@ -6,8 +6,18 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import { getStorage, ref, uploadBytesResumable } from "firebase/storage";
-import { app } from "@/lib/firebase"; // ✅ Your Firebase config
+import {
+  getStorage,
+  ref,
+  uploadBytesResumable,
+  getDownloadURL,
+} from "firebase/storage";
+import {
+  collection,
+  addDoc,
+  serverTimestamp,
+} from "firebase/firestore";
+import { app, db } from "@/lib/firebase";
 
 export default function UploadPage() {
   const [eventCode, setEventCode] = useState("");
@@ -33,26 +43,46 @@ export default function UploadPage() {
 
     for (let i = 0; i < files.length; i++) {
       const file = files[i];
+      const metadata = { contentType: file.type }; // ✅ Fix: add metadata for contentType
       const storageRef = ref(storage, `events/${eventCode}/${file.name}`);
-      const uploadTask = uploadBytesResumable(storageRef, file);
+      const uploadTask = uploadBytesResumable(storageRef, file, metadata);
 
       await new Promise<void>((resolve, reject) => {
         uploadTask.on(
           "state_changed",
           (snapshot) => {
-            const totalProgress = Math.round(
+            const currentProgress = Math.round(
               (snapshot.bytesTransferred / snapshot.totalBytes) * 100
             );
-            setProgress(Math.floor((totalProgress + i * 100) / files.length));
+            // 🔁 Set progress across all files
+            const totalProgress = Math.floor(
+              ((i * 100 + currentProgress) / (files.length * 100)) * 100
+            );
+            setProgress(totalProgress);
           },
-          reject,
-          () => resolve()
+          (error) => {
+            console.error("Upload error:", error);
+            reject(error);
+          },
+          async () => {
+            const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
+
+            // 🔥 Save image metadata in Firestore
+            await addDoc(collection(db, "images"), {
+              eventCode,
+              url: downloadURL,
+              uploadedAt: serverTimestamp(),
+            });
+
+            resolve();
+          }
         );
       });
     }
 
     setUploading(false);
     setSuccess(true);
+    setFiles([]); // optional: clear the selection after upload
   };
 
   return (
