@@ -12,9 +12,9 @@ async function loadModels() {
   try {
     console.log("📦 Loading models from:", MODEL_URL);
 
-    await faceapi.nets.ssdMobilenetv1.loadFromDisk(MODEL_URL);
-    await faceapi.nets.faceLandmark68Net.loadFromDisk(MODEL_URL);
-    await faceapi.nets.faceRecognitionNet.loadFromDisk(MODEL_URL);
+    await faceapi.nets.ssdMobilenetv1.loadFromDisk('./models/ssd_mobilenetv1');
+    await faceapi.nets.faceLandmark68Net.loadFromDisk('./models/face_landmark_68');
+    await faceapi.nets.faceRecognitionNet.loadFromDisk('./models/face_recognition');
 
     console.log("✅ All models loaded successfully!");
   } catch (err) {
