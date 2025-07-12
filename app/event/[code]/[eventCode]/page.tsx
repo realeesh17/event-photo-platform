@@ -21,7 +21,7 @@ export default function EventPage() {
 
         setImages(eventImages);
       } catch (error) {
-        console.error("❌ Error fetching images:", error);
+        console.error("❌❌ Error fetching images:", error);
       } finally {
         setLoading(false);
       }
