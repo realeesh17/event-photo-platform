@@ -2,13 +2,13 @@
 
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
-import { db } from "@/firebase";
+import { db } from "../../../firebase";
 import { collection, getDocs, DocumentData } from "firebase/firestore";
 export default function EventPage() {
   const { eventCode } = useParams();
   const [images, setImages] = useState<DocumentData[]>([]);
   const [loading, setLoading] = useState(true);
-// we have to make this to return all we have/want
+// we have to make this to return all we have in the image collection
   useEffect(() => {
     const fetchImages = async () => {
       try {
