@@ -3,6 +3,13 @@ import { initializeApp } from "firebase/app";
 import { getFirestore } from "firebase/firestore";
 import { getStorage } from "firebase/storage";
 
+let analytics = null;
+if (typeof window !== 'undefined') {
+  import("firebase/analytics").then(({ getAnalytics }) => {
+    analytics = getAnalytics();
+  });
+}
+
 // 🔁 Replace with your actual Firebase config from Firebase Console
 const firebaseConfig = {
   apiKey: "AIzaSyCDZ36BAV3WwwAECvOSWEfmdc3KnkLSzj8",
