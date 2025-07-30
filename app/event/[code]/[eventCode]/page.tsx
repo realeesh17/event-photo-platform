@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
-import { db } from "../../../firebase";
+import { db } from "@/firebase";
 import { collection, getDocs, DocumentData } from "firebase/firestore";
 export default function EventPage() {
   const { eventCode } = useParams();
