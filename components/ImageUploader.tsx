@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, ChangeEvent } from "react";
-import { storage, db } from "../firebase"; 
+import { storage, db } from "../app/firebase"; 
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { collection, addDoc, serverTimestamp } from "firebase/firestore";
 
