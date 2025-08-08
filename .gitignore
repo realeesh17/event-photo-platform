@@ -25,3 +25,5 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+app/event/\[code]/page.tsx
+app/event/\[code]/\[eventCode]/page.tsx
