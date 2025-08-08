@@ -51,6 +51,7 @@
     "express": "^5.1.0",
     "face-api.js": "^0.20.0",
     "firebase": "^11.9.1",
+    "firebase-admin": "^13.4.0",
     "framer-motion": "latest",
     "html5-qrcode": "latest",
     "input-otp": "1.4.1",
