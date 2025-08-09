@@ -1,5 +1,5 @@
 -- Database setup for PhotoMatch platform
--- This script creates the necessary tables for the application
+-- This script creates the necessary tables for the application.
 
 -- Create events table
 CREATE TABLE IF NOT EXISTS events (
