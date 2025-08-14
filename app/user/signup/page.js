@@ -1,6 +1,8 @@
+"use client";
+
 import { useState } from "react";
-import { useRouter } from "next/router";
-import { auth, db } from "../../firebase"; // your firebase config
+import { useRouter } from "next/navigation"; // ✅ Updated for App Router
+import { auth, db } from "../../firebase"; // adjust relative path if needed
 import { createUserWithEmailAndPassword } from "firebase/auth";
 import { doc, setDoc } from "firebase/firestore";
 
@@ -33,7 +35,7 @@ export default function Signup() {
         createdAt: new Date(),
       });
 
-      // Redirect directly to main page
+      // Redirect to main page
       router.push("/user/main");
     } catch (err) {
       setError(err.message);

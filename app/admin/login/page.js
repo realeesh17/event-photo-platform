@@ -1,5 +1,7 @@
+"use client";
+
 import { useState } from "react";
-import { useRouter } from "next/router";
+import { useRouter } from "next/navigation"; // ✅ Updated for App Router
 
 export default function AdminLogin() {
   const [email, setEmail] = useState("");
@@ -10,7 +12,7 @@ export default function AdminLogin() {
   const handleLogin = async (e) => {
     e.preventDefault();
 
-    // Temporary: Simple check (replace with Firebase/Auth logic later)
+    // Temporary authentication check (replace with Firebase/Auth logic later)
     if (email === "admin@example.com" && password === "admin123") {
       router.push("/admin/host");
     } else {
