@@ -1,4 +1,5 @@
 import ImageUploader from "@/components/ImageUploader";
+import EventGallery from "@/components/EventGallery";
 import Gallery from "@/components/Gallery";
 
 export default function AdminMainPage() {
@@ -11,8 +12,12 @@ export default function AdminMainPage() {
       {/* Upload Images */}
       <ImageUploader eventCode={eventCode} />
 
+      {/* Live EventGallery */}
+      <EventGallery eventCode={eventCode} />
+
       {/* Live Gallery */}
       <Gallery eventCode={eventCode} />
+
     </div>
   );
 }

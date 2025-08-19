@@ -7,8 +7,8 @@ import { collection, onSnapshot, orderBy, query } from "firebase/firestore";
 interface Photo {
   id: string;
   imageUrl: string;
-  uploaderId: string;
-  timestamp?: any;
+  uploaderId?: string;
+  timestamp?: any; // Firestore Timestamp
 }
 
 export default function Gallery({ eventCode }: { eventCode: string }) {
@@ -24,8 +24,8 @@ export default function Gallery({ eventCode }: { eventCode: string }) {
     const unsubscribe = onSnapshot(q, (snapshot) => {
       const images: Photo[] = snapshot.docs.map((doc) => ({
         id: doc.id,
-        ...doc.data(),
-      })) as Photo[];
+        ...(doc.data() as Omit<Photo, "id">),
+      }));
       setPhotos(images);
       setLoading(false);
     });
@@ -33,13 +33,21 @@ export default function Gallery({ eventCode }: { eventCode: string }) {
     return () => unsubscribe();
   }, [eventCode]);
 
-  if (loading) return <p className="text-center text-gray-500">Loading gallery...</p>;
-  if (photos.length === 0) return <p className="text-center text-gray-400">No photos uploaded yet.</p>;
+  if (loading) {
+    return <p className="text-center text-gray-500">⏳ Loading gallery...</p>;
+  }
+
+  if (photos.length === 0) {
+    return <p className="text-center text-gray-400">No photos uploaded yet.</p>;
+  }
 
   return (
     <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 p-4">
       {photos.map((photo) => (
-        <div key={photo.id} className="rounded-xl shadow overflow-hidden">
+        <div
+          key={photo.id}
+          className="rounded-xl shadow overflow-hidden hover:scale-105 transition"
+        >
           <img
             src={photo.imageUrl}
             alt="Event"
