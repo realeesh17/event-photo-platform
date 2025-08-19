@@ -1,4 +1,5 @@
 "use client";
+
 import { useState } from "react";
 import { storage, db } from "@/lib/firebase";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
@@ -6,9 +7,10 @@ import { collection, addDoc, serverTimestamp } from "firebase/firestore";
 
 interface Props {
   eventCode: string;
+  uploaderName?: string; // optional, defaults to "Admin"
 }
 
-export default function ImageUploader({ eventCode }: Props) {
+export default function ImageUploader({ eventCode, uploaderName = "Admin" }: Props) {
   const [uploading, setUploading] = useState(false);
 
   const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -19,7 +21,7 @@ export default function ImageUploader({ eventCode }: Props) {
 
     try {
       for (const file of files) {
-        // Upload to Storage
+        // Upload to Firebase Storage
         const storageRef = ref(storage, `events/${eventCode}/${file.name}`);
         await uploadBytes(storageRef, file);
         const downloadURL = await getDownloadURL(storageRef);
@@ -27,23 +29,26 @@ export default function ImageUploader({ eventCode }: Props) {
         // Save metadata to Firestore
         await addDoc(collection(db, "events", eventCode, "images"), {
           eventCode,
-          imageUrl: downloadURL,
           fileName: file.name,
+          imageUrl: downloadURL,
+          uploaderName,
           uploadedAt: serverTimestamp(),
+          faceDetected: false, // default until backend processes
         });
       }
-      alert("✅ Upload successful!");
+
+      alert("✅ Upload successful! Metadata saved.");
     } catch (error) {
       console.error("Upload error:", error);
-      alert("❌ Upload failed, check console");
+      alert("❌ Upload failed. Check console for details.");
     } finally {
       setUploading(false);
     }
   };
 
   return (
-    <div className="mb-6">
-      <label className="block font-semibold mb-2">Upload Event Images</label>
+    <div className="mb-6 p-4 bg-white rounded-xl shadow-md max-w-md">
+      <label className="block font-semibold mb-2">📤 Upload Event Images</label>
       <input
         type="file"
         multiple
