@@ -1,74 +1,57 @@
 "use client";
-
-import { useState, ChangeEvent } from "react";
+import { useState } from "react";
+import { storage, db } from "@/lib/firebase";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { collection, addDoc, serverTimestamp } from "firebase/firestore";
-import { storage, db, auth } from "@/lib/firebase";
 
-// ✅ Define props clearly
 interface Props {
   eventCode: string;
 }
 
 export default function ImageUploader({ eventCode }: Props) {
-  const [file, setFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
 
-  // ✅ Handle file upload
-  const handleUpload = async () => {
-    if (!file) return alert("Please select a file.");
-    if (!eventCode) return alert("No event code provided.");
+  const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files ? Array.from(e.target.files) : [];
+    if (files.length === 0) return;
 
     setUploading(true);
+
     try {
-      // 1. Upload file to Firebase Storage
-      const fileRef = ref(storage, `events/${eventCode}/${file.name}`);
-      await uploadBytes(fileRef, file);
-      const downloadURL = await getDownloadURL(fileRef);
+      for (const file of files) {
+        // Upload to Storage
+        const storageRef = ref(storage, `events/${eventCode}/${file.name}`);
+        await uploadBytes(storageRef, file);
+        const downloadURL = await getDownloadURL(storageRef);
 
-      // 2. Save metadata in Firestore
-      await addDoc(collection(db, "events", eventCode, "photos"), {
-        eventCode,
-        imageUrl: downloadURL,
-        filename: file.name,
-        uploaderId: auth.currentUser?.uid || "anonymous",
-        timestamp: serverTimestamp(),
-        faceDetected: false, // reserved for later backend processing
-      });
-
-      alert("✅ Image uploaded & metadata saved!");
-      setFile(null);
+        // Save metadata to Firestore
+        await addDoc(collection(db, "events", eventCode, "images"), {
+          eventCode,
+          imageUrl: downloadURL,
+          fileName: file.name,
+          uploadedAt: serverTimestamp(),
+        });
+      }
+      alert("✅ Upload successful!");
     } catch (error) {
       console.error("Upload error:", error);
-      alert("❌ Upload failed. Check console.");
+      alert("❌ Upload failed, check console");
     } finally {
       setUploading(false);
     }
   };
 
-  // ✅ Handle file selection
-  const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files.length > 0) {
-      setFile(e.target.files[0]);
-    }
-  };
-
   return (
-    <div className="p-4 rounded-xl shadow bg-white w-full max-w-md">
-      <h2 className="text-xl font-bold mb-2">📸 Upload Image</h2>
+    <div className="mb-6">
+      <label className="block font-semibold mb-2">Upload Event Images</label>
       <input
         type="file"
-        accept="image/*"
-        onChange={handleFileChange}
-        className="mb-2"
+        multiple
+        onChange={handleUpload}
+        disabled={uploading}
+        className="block w-full p-2 border rounded text-sm text-gray-600"
       />
-      <button
-        onClick={handleUpload}
-        disabled={!file || uploading}
-        className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-xl w-full"
-      >
-        {uploading ? "Uploading..." : "Upload"}
-      </button>
+      {uploading && <p className="text-blue-500 mt-2">Uploading...</p>}
     </div>
   );
 }
