@@ -1,11 +1,11 @@
 "use client";
 
 import { useState, ChangeEvent } from "react";
-import { storage, db } from "../app/firebase"; 
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { collection, addDoc, serverTimestamp } from "firebase/firestore";
+import { storage, db, auth } from "@/lib/firebase";
 
-// ✅ Add correct prop typing
+// ✅ Define props clearly
 interface Props {
   eventCode: string;
 }
@@ -14,35 +14,39 @@ export default function ImageUploader({ eventCode }: Props) {
   const [file, setFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
 
+  // ✅ Handle file upload
   const handleUpload = async () => {
-    if (!file || !eventCode) return alert("Please select a file and event code.");
+    if (!file) return alert("Please select a file.");
+    if (!eventCode) return alert("No event code provided.");
 
     setUploading(true);
     try {
-      const storageRef = ref(storage, `images/${eventCode}/${file.name}`);
-      await uploadBytes(storageRef, file);
+      // 1. Upload file to Firebase Storage
+      const fileRef = ref(storage, `events/${eventCode}/${file.name}`);
+      await uploadBytes(fileRef, file);
+      const downloadURL = await getDownloadURL(fileRef);
 
-      const downloadURL = await getDownloadURL(storageRef);
-
-      await addDoc(collection(db, "images"), {
+      // 2. Save metadata in Firestore
+      await addDoc(collection(db, "events", eventCode, "photos"), {
         eventCode,
-        imageURL: downloadURL,
+        imageUrl: downloadURL,
         filename: file.name,
+        uploaderId: auth.currentUser?.uid || "anonymous",
         timestamp: serverTimestamp(),
-        faceDetected: false,
+        faceDetected: false, // reserved for later backend processing
       });
 
-      alert("✅ Uploaded & Metadata saved!");
+      alert("✅ Image uploaded & metadata saved!");
       setFile(null);
     } catch (error) {
       console.error("Upload error:", error);
-      alert("Upload failed!");
+      alert("❌ Upload failed. Check console.");
     } finally {
       setUploading(false);
     }
   };
 
-  // ✅ Use correct type for file input change
+  // ✅ Handle file selection
   const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
       setFile(e.target.files[0]);
